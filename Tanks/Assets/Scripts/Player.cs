@@ -6,27 +6,55 @@ public class Player : MonoBehaviour {
 	public float playerSpeed = 0.1f;
 
 	private Animator animator;
+	public Camera cam;				// ссылка на нашу камеру
+	private int animationState;					// поворот 
+	private NetworkView networkView;
 
-	// Use this for initialization
 	void Start () {
+		cam = GetComponentInChildren<Camera>();
 		animator = (Animator)GetComponent<Animator> ();
+		networkView = GetComponent<NetworkView> ();
 	}
 	
 	// Update is called once per frame
 	void Update () {
-		if(Input.GetKeyDown(KeyCode.UpArrow))
-			animator.SetInteger("State",1);
-		if(Input.GetKeyDown(KeyCode.DownArrow))
-			animator.SetInteger("State",2);
-		if(Input.GetKeyDown(KeyCode.LeftArrow))
-			animator.SetInteger("State",3);
-		if(Input.GetKeyDown(KeyCode.RightArrow))
-			animator.SetInteger("State",4);
+		if (networkView.isMine) {
+			if (Input.GetKeyDown (KeyCode.UpArrow))
+				animator.SetInteger ("State", 1);
+			if (Input.GetKeyDown (KeyCode.DownArrow))
+				animator.SetInteger ("State", 2);
+			if (Input.GetKeyDown (KeyCode.LeftArrow))
+				animator.SetInteger ("State", 3);
+			if (Input.GetKeyDown (KeyCode.RightArrow))
+				animator.SetInteger ("State", 4);
 
-		if(!Input.anyKey)
-			animator.SetInteger("State",0);
+			if (!Input.anyKey)
+				animator.SetInteger ("State", 0);
 
-		Move ();
+			Move ();
+		} else {
+			if(cam.enabled) { 
+				cam.enabled = false; 
+				cam.gameObject.GetComponent<AudioListener>().enabled = false;
+			}
+		}
+	}
+
+	// Вызывается с определенной частотой. Отвечает за сереализицию переменных
+	void OnSerializeNetworkView (BitStream stream, NetworkMessageInfo info) {
+		Vector3 syncPosition = Vector3.zero;
+		if (stream.isWriting) {
+			animationState = animator.GetInteger("State");
+			syncPosition = transform.position;
+			
+			stream.Serialize(ref syncPosition);
+			stream.Serialize(ref animationState);
+		} else {
+			stream.Serialize(ref syncPosition);
+			stream.Serialize(ref animationState);
+
+			animator.SetInteger ("State", animationState);
+		}
 	}
 
 	void Move()
@@ -34,7 +62,7 @@ public class Player : MonoBehaviour {
 		var deltaX = 0.0f;
 		var deltaY = 0.0f;
 
-		var animationState = animator.GetCurrentAnimatorStateInfo(0).nameHash ;
+		var animationState = animator.GetCurrentAnimatorStateInfo(0).nameHash;
 
 		if (animationState.ToString() == "-1915430808") {
 			deltaY = playerSpeed;
