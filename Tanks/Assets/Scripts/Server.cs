@@ -6,6 +6,7 @@ public class Server : MonoBehaviour {
 	public GameObject PlayerPrefab;	// Персонаж игрока
 	public string ip = "127.0.0.1";	// ip для создания или подключения к серверу
 	public string port = "5300";	// Порт
+	public bool isNat = true;       // Nat
 	public bool connected;			// Статус подключения
 	private GameObject _go;			// Объект для ссылки на игрока
 	public bool _visible = false;	// Статус показа меню
@@ -31,16 +32,18 @@ public class Server : MonoBehaviour {
 		} else {
 			GUI.Label(new Rect((Screen.width - 100)/2, Screen.height/2-60, 100, 20), "Ip");
 			GUI.Label(new Rect((Screen.width - 100)/2, Screen.height/2-30, 100, 20), "Порт");
+			GUI.Label(new Rect((Screen.width - 100)/2, Screen.height/2-0, 100, 20), "NAT");
 			ip = GUI.TextField(new Rect((Screen.width - 100)/2+35, Screen.height/2-60, 100, 20), ip);
 			port = GUI.TextField(new Rect((Screen.width - 100)/2+35, Screen.height/2-30, 50, 20), port);
+			isNat = GUI.Toggle(new Rect((Screen.width - 100)/2+35, Screen.height/2, 50, 20), isNat, "");
 			
-			if(GUI.Button(new Rect((Screen.width - 110)/2, Screen.height/2, 110, 30), "Присоединиться"))
+			if(GUI.Button(new Rect((Screen.width - 110)/2, Screen.height/2 + 35, 110, 30), "Присоединиться"))
 				Network.Connect(ip, Convert.ToInt32(port));
 			
-			if(GUI.Button(new Rect((Screen.width - 110)/2, Screen.height/2 + 35, 110, 30), "Создать сервер"))
-				Network.InitializeServer(10, Convert.ToInt32(port), false);
+			if(GUI.Button(new Rect((Screen.width - 110)/2, Screen.height/2 + 70, 110, 30), "Создать сервер"))
+				Network.InitializeServer(10, Convert.ToInt32(port), isNat);
 			
-			if(GUI.Button(new Rect((Screen.width - 110)/2, Screen.height/2 + 70, 110, 30), "Выход"))
+			if(GUI.Button(new Rect((Screen.width - 110)/2, Screen.height/2 + 105, 110, 30), "Выход"))
 				Application.Quit();
 		}
 	}
@@ -65,8 +68,10 @@ public class Server : MonoBehaviour {
 	void CreatePlayer () {
 		connected = true;
 		GetComponent<Camera>().enabled = false;
+		GetComponent<AudioListener>().enabled = false;
 		_go = (GameObject)Network.Instantiate(PlayerPrefab, new Vector2(0,0), transform.rotation, 1);
 		_go.transform.FindChild ("Camera").gameObject.GetComponent<Camera>().enabled = true;
+		_go.transform.FindChild ("Camera").gameObject.GetComponent<AudioListener>().enabled = true;
 	}
 	
 	// При отключении от сервера

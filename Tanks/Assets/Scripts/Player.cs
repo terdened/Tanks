@@ -9,8 +9,9 @@ public class Player : MonoBehaviour {
 	public Camera cam;				// ссылка на нашу камеру
 	private int animationState;					// поворот 
 	private NetworkView networkView;
+	public GameObject BuletPrefab;	// Персонаж игрока
 
-	void Start () {
+	void Awake () {
 		cam = GetComponentInChildren<Camera>();
 		animator = (Animator)GetComponent<Animator> ();
 		networkView = GetComponent<NetworkView> ();
@@ -28,16 +29,24 @@ public class Player : MonoBehaviour {
 			if (Input.GetKeyDown (KeyCode.RightArrow))
 				animator.SetInteger ("State", 4);
 
+			if(Input.GetKeyDown(KeyCode.Space))
+			{
+				var bulet = (GameObject)Network.Instantiate(BuletPrefab, 
+				                                       transform.position, transform.rotation, 1);
+
+				bulet.GetComponent<Bulet>().InitDirection(animator.GetInteger("State"));
+			}
+
 			if (!Input.anyKey)
 				animator.SetInteger ("State", 0);
-
-			Move ();
 		} else {
 			if(cam.enabled) { 
 				cam.enabled = false; 
 				cam.gameObject.GetComponent<AudioListener>().enabled = false;
 			}
 		}
+
+		Move ();
 	}
 
 	// Вызывается с определенной частотой. Отвечает за сереализицию переменных
@@ -54,6 +63,9 @@ public class Player : MonoBehaviour {
 			stream.Serialize(ref animationState);
 
 			animator.SetInteger ("State", animationState);
+			transform.position = syncPosition;
+
+			print(animationState);
 		}
 	}
 
