@@ -34,15 +34,31 @@ public class Player : MonoBehaviour {
 				var bulet = (GameObject)Network.Instantiate(BuletPrefab, 
 				                                       transform.position, transform.rotation, 1);
 
-				bulet.GetComponent<Bulet>().InitDirection(animator.GetInteger("State"));
+				int direction = 0;
+				var animationState = animator.GetCurrentAnimatorStateInfo(0).nameHash;
+
+				if(animationState == 2076846114 || animationState == -1915430808){
+					direction = 1;
+				}else if(animationState == -428478410 || animationState == 1365136315){
+					direction = 2;
+				}else if(animationState == -2131916955 || animationState == 935732456){
+					direction = 3;
+				}else if(animationState == -897481783 || animationState == 1497323511){
+					direction = 4;
+				}
+
+				bulet.GetComponent<Bulet>().InitDirection(direction);
 			}
 
 			if (!Input.anyKey)
+			{
+				
 				animator.SetInteger ("State", 0);
+
+			}
 		} else {
 			if(cam.enabled) { 
 				cam.enabled = false; 
-				cam.gameObject.GetComponent<AudioListener>().enabled = false;
 			}
 		}
 
@@ -64,8 +80,6 @@ public class Player : MonoBehaviour {
 
 			animator.SetInteger ("State", animationState);
 			transform.position = syncPosition;
-
-			print(animationState);
 		}
 	}
 
@@ -76,19 +90,19 @@ public class Player : MonoBehaviour {
 
 		var animationState = animator.GetCurrentAnimatorStateInfo(0).nameHash;
 
-		if (animationState.ToString() == "-1915430808") {
+		if (animationState == -1915430808) {
 			deltaY = playerSpeed;
 		}
 
-		if (animationState.ToString() == "1365136315") {
+		if (animationState == 1365136315) {
 			deltaY = -playerSpeed;
 		}
 
-		if (animationState.ToString() == "935732456") {
+		if (animationState == 935732456) {
 			deltaX = -playerSpeed;
 		}
 
-		if (animationState.ToString() == "1497323511") {
+		if (animationState == 1497323511) {
 			deltaX = playerSpeed;
 		}
 
