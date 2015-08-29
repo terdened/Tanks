@@ -4,6 +4,8 @@ using System.Collections;
 public class Player : MonoBehaviour {
 
 	public float playerSpeed = 0.1f;
+	public int health = 100;
+	private int counter = 300;
 
 	private Animator animator;
 	public Camera cam;				// ссылка на нашу камеру
@@ -15,6 +17,7 @@ public class Player : MonoBehaviour {
 		cam = GetComponentInChildren<Camera>();
 		animator = (Animator)GetComponent<Animator> ();
 		networkView = GetComponent<NetworkView> ();
+		Respawn ();
 	}
 	
 	// Update is called once per frame
@@ -63,6 +66,27 @@ public class Player : MonoBehaviour {
 		}
 
 		Move ();
+		if(health <= 0 && animator.GetInteger ("State") != 5)
+			animator.SetInteger ("State", 5);
+
+		if (health <= 0)
+			counter--;
+
+		if (counter < 0)
+			Respawn ();
+	}
+
+	void Respawn()
+	{
+		health = 100;
+		counter = 300;
+		transform.position = new Vector2 (Random.Range(-30,30), Random.Range(-30,30));
+		animator.SetInteger ("State", 0);
+	}
+
+	public void Hit(int damage)
+	{
+		health -= damage;
 	}
 
 	// Вызывается с определенной частотой. Отвечает за сереализицию переменных

@@ -4,6 +4,7 @@ using System.Collections;
 public class Bulet : MonoBehaviour {
 
 	public float buletSpeed = 0.35f;
+	public int damage = 5;
 	
 	private Animator animator;
 	private int animationState;					// поворот 
@@ -108,6 +109,7 @@ public class Bulet : MonoBehaviour {
 			}
 
 			other.attachedRigidbody.AddForce (forceVector);
+			other.transform.GetComponent<Player>().Hit(damage);
 			animator.SetInteger ("State", 5);
 
 			//Network.Destroy (GetComponent<NetworkView> ().viewID);
